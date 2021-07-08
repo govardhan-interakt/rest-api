@@ -1,5 +1,6 @@
 const express = require('express')
 const router = express.Router()
+const db = require('../config/db')
 
 
 
@@ -7,29 +8,17 @@ const router = express.Router()
 const {User}= require('../models/user')
 
 
-// add user to database
-router.post('/api/user/add',async (req,res) =>{
-    try{
-    const user = new User({
-        name:req.body.name,
-        email:req.body.email,
-        age:req.body.age
+//insert array of objects in database
+router.post('/users',(req,res)=>{
+
+    User.insertMany(req.body).then((users)=>{
+        res.status(201).send(users)
+    }).catch((error)=>{
+        res.status(400).send(error)
     })
-    user.save((err,data)=>{
-        if(!err){
-        res.status(200).json({code:200,message:'User added successfully',addUser:data})
-        } else{
-            res.status(400).json({code:400,message:'User not added',addUser:err})
-        }
-    })
-    } catch(error){
-        res.status(500).send(error.message)
-    }
 })
 
-
-
-//Get all users
+//get users from data base
 
 router.get('/users',async (req,res)=>{
     try{
@@ -39,7 +28,6 @@ router.get('/users',async (req,res)=>{
         res.status(500).send(error.message)
     }
 })
-
 //Get single user
 router.get('/api/user/:id',(req,res)=>{
     User.findById(req.params.id,(err,data)=>{
@@ -50,6 +38,17 @@ router.get('/api/user/:id',(req,res)=>{
         }
     })
 })
+
+//search matching user from database
+
+router.get('/search/:name',(req,res)=>{
+    const regex = new RegExp(req.params.name,'i')
+    User.find({name:regex}).then((users)=>{
+        res.status(200).json(users)
+    })
+})
+
+
 // Get user of pagination of user list
 
 router.get('/api/user',async (req,res)=>{
