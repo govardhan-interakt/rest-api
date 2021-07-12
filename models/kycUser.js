@@ -3,7 +3,7 @@ const validator = require('validator')
 
 //User Schema
 
-const userSchema = new mongoose.Schema({
+const kycUserSchema = new mongoose.Schema({
     name:{
         type:String,
         required:true
@@ -38,7 +38,7 @@ const userSchema = new mongoose.Schema({
     }
 
 })
-const User= mongoose.model('User',userSchema)
+const kycUser= mongoose.model('kycUser',kycUserSchema)
 
 
-module.exports = {User}
+module.exports = {kycUser}

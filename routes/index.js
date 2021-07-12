@@ -2,10 +2,13 @@ const express = require('express')
 const router = express.Router()
 const db = require('../config/db')
 
-
-
+const multer = require('multer')
+const path = require('path')
 
 const {User}= require('../models/user')
+const {kycUser}=require('../models/kycUser')
+const { employee } = require('../models/employee')
+const { endianness } = require('os')
 
 
 //insert array of objects in database
@@ -14,7 +17,7 @@ router.post('/users',(req,res)=>{
     User.insertMany(req.body).then((users)=>{
         res.status(201).send(users)
     }).catch((error)=>{
-        res.status(400).send(error)
+        res.status(400).send(error.message)
     })
 })
 
@@ -28,6 +31,28 @@ router.get('/users',async (req,res)=>{
         res.status(500).send(error.message)
     }
 })
+
+// insert array of objects in new collection 
+
+router.post('/kycUser',(req,res)=>{
+    
+    kycUser.create(req.body).then((kycUser)=>{
+        res.status(201).send(kycUser)
+    }).catch((error)=>{
+        res.status(400).send(error.message)
+    })
+})
+// Get user with kyc
+router.get('/kycUser',async (req,res)=>{
+    try{
+        const users = await kycUser.find()
+        res.send(users)
+    } catch(error){
+        res.status(500).send(error.message)
+    }
+})
+
+
 //Get single user
 router.get('/api/user/:id',(req,res)=>{
     User.findById(req.params.id,(err,data)=>{
@@ -86,6 +111,170 @@ router.put('/api/user/edit/:id',(req,res)=>{
         }
     })
 })
+
+// Storage engine
+
+const storage = multer.diskStorage({
+    destination:'./upload/images',
+    filename:(req,file,cb)=>{
+        return cb(null,`${file.filename}_${Date.now()}${path.extname(file.originalname)}`)
+    }
+})
+
+const upload = multer(
+    {
+      storage:storage ,
+      limits:{
+          filesize:1000000
+      } 
+    }
+)
+//upload profile picture
+router.post('/upload',upload.single('profile'),async(req,res)=>{
+    try{
+    res.json({
+        success:1,
+        profile_url:`http://localhost:4545/profile/${req.file.filename}`
+
+    })
+}catch(error){
+    
+    res.status(500).send(error.message)
+}
+})
+
+// get number of users
+router.get('/countDocuments',(req,res)=>{
+    User.countDocuments().then((count,err)=>{
+        if(err){
+            res.status(401)
+        }
+        else{
+            res.json(count)
+        }
+    })
+})
+// get number of users with kyc data
+router.get('/countDocuments',(req,res)=>{
+    kycUser.countDocuments().then((count,err)=>{
+        if(err){
+            res.status(401)
+        }
+        else{
+            res.json(count)
+        }
+    })
+})
+
+//register employee in database
+router.post('/employee',async(req,res)=>{
+
+    const user =new employee(req.body)
+    try {
+    await  user.save()
+        res.status(201).send(user)
+    } catch (error){
+        res.status(400).send(error.message)
+    }
+    
+})
+
+//login employees
+
+router.post('/employee/login',async (req,res)=>{
+    try{
+        const user = await employee.findByCredentials(req.body.email,req.body.password)
+    
+        res.send(user)
+
+    }catch(error){
+        res.status(400).send(error.message)
+    }
+})
+//Get employee details from db
+router.get('/employees',async (req,res)=>{
+    try{
+        const users = await employee.find()
+        res.send(users)
+    } catch(error){
+        res.status(500).send(error.message)
+    }
+})
+//get one employee
+router.get('/employee/:id',(req,res)=>{
+    employee.findById(req.params.id,(err,data)=>{
+        if(!err){
+            res.send(data)
+        } else {
+            console.log(err)
+        }
+    })
+})
+
+
+
+//get users registered today
+router.get('/em',async(req,res)=>{
+
+    let{startDate,endDate}=req.body;
+
+    if(startDate === ''|| endDate === ''){
+        return res.status(400).json({
+            status:'failure',
+            message:'ensure date'
+        })
+    }
+    console.log({startDate,endDate})
+
+
+ const users= employee.find({
+    date:{
+        $gte: new Date(new Date(startDate).setHours(00, 00, 00)),
+        $it: new Date(new Date(endDate).setHours(23, 59, 59))
+    }
+}).sort({date:'asc'})
+
+res.send(users)
+if(!users){
+    res.status(404).json({
+        status:'failure',
+        message:'could not rfetreive data'
+    })
+}else{
+    res.status(200).json({
+        status:'success',
+        data:users
+    })
+}
+})
+
+
+// get number of users
+router.get('/countDocuments',(req,res)=>{
+    User.countDocuments().then((count,err)=>{
+        if(err){
+            res.status(401)
+        }
+        else{
+            res.json(count)
+        }
+    })
+})
+// get number of users with kyc data
+router.get('/countDocuments',(req,res)=>{
+    kycUser.countDocuments().then((count,err)=>{
+        if(err){
+            res.status(401)
+        }
+        else{
+            res.json(count)
+        }
+    })
+})
+
+
+
+
 
 
 module.exports = router
