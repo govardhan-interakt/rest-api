@@ -8,7 +8,6 @@ const path = require('path')
 const {User}= require('../models/user')
 const {kycUser}=require('../models/kycUser')
 const { employee } = require('../models/employee')
-const { endianness } = require('os')
 
 
 //insert array of objects in database
@@ -31,28 +30,6 @@ router.get('/users',async (req,res)=>{
         res.status(500).send(error.message)
     }
 })
-
-// insert array of objects in new collection 
-
-router.post('/kycUser',(req,res)=>{
-    
-    kycUser.create(req.body).then((kycUser)=>{
-        res.status(201).send(kycUser)
-    }).catch((error)=>{
-        res.status(400).send(error.message)
-    })
-})
-// Get user with kyc
-router.get('/kycUser',async (req,res)=>{
-    try{
-        const users = await kycUser.find()
-        res.send(users)
-    } catch(error){
-        res.status(500).send(error.message)
-    }
-})
-
-
 //Get single user
 router.get('/api/user/:id',(req,res)=>{
     User.findById(req.params.id,(err,data)=>{
@@ -72,6 +49,28 @@ router.get('/search/:name',(req,res)=>{
         res.status(200).json(users)
     })
 })
+// insert array of objects in new collection 
+
+router.post('/kycUser',(req,res)=>{
+    
+    kycUser.create(req.body).then((kycUser)=>{
+        res.status(201).send(kycUser)
+    }).catch((error)=>{
+        res.status(400).send(error.message)
+    })
+})
+// Get user with kyc
+router.get('/kycUsers',async (req,res)=>{
+    try{
+        const users = await kycUser.find()
+        res.send(users)
+    } catch(error){
+        res.status(500).send(error.message)
+    }
+})
+
+
+
 
 
 // Get user of pagination of user list
@@ -130,7 +129,7 @@ const upload = multer(
     }
 )
 //upload profile picture
-router.post('/upload',upload.single('profile'),async(req,res)=>{
+router.post('/user/upload',upload.single('profile'),async(req,res)=>{
     try{
     res.json({
         success:1,
@@ -143,28 +142,7 @@ router.post('/upload',upload.single('profile'),async(req,res)=>{
 }
 })
 
-// get number of users
-router.get('/countDocuments',(req,res)=>{
-    User.countDocuments().then((count,err)=>{
-        if(err){
-            res.status(401)
-        }
-        else{
-            res.json(count)
-        }
-    })
-})
-// get number of users with kyc data
-router.get('/countDocuments',(req,res)=>{
-    kycUser.countDocuments().then((count,err)=>{
-        if(err){
-            res.status(401)
-        }
-        else{
-            res.json(count)
-        }
-    })
-})
+
 
 //register employee in database
 router.post('/employee',async(req,res)=>{
@@ -250,7 +228,7 @@ if(!users){
 
 
 // get number of users
-router.get('/countDocuments',(req,res)=>{
+router.get('/users/countDocuments',(req,res)=>{
     User.countDocuments().then((count,err)=>{
         if(err){
             res.status(401)
@@ -261,7 +239,7 @@ router.get('/countDocuments',(req,res)=>{
     })
 })
 // get number of users with kyc data
-router.get('/countDocuments',(req,res)=>{
+router.get('/kycusers/countDocuments',(req,res)=>{
     kycUser.countDocuments().then((count,err)=>{
         if(err){
             res.status(401)
@@ -271,6 +249,8 @@ router.get('/countDocuments',(req,res)=>{
         }
     })
 })
+
+
 
 
 
