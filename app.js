@@ -24,8 +24,12 @@ res.send({
 })
 }*/
 //Routes
-app.use('/',require('./routes/index'))
+const userRoutes = require('./routes/user')
+const employeeRoutes =require('./routes/employee')
 
+
+app.use('/',userRoutes)
+app.use('/',employeeRoutes)
 
 
 connectDB()
