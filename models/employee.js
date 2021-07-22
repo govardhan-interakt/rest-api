@@ -31,25 +31,7 @@ const employeeSchema = new mongoose.Schema({
             }
         }
     },
-    age:{
-        type:Number,
-        validate(value){
-            if (value < 0){
-                throw new Error('Age must be a positive number')
-            }
-        }
-    },
-    address:{
-        type:String,
-        required:true  
-    },
-    DOB:{
-       type:Date,
-       required:true,
-       trim:true
-    },
-    date:Date
-
+    
 })
 
 employeeSchema.statics.findByCredentials= async(email,password)=>{

@@ -7,38 +7,27 @@ const path = require('path')
 
 const {User}= require('../models/user')
 
-exports.user_register=(req,res)=>{
-    
-    User.create(req.body).then((User)=>{  
-        res.status(201).send(User)
-    }).catch((error)=>{
-        res.status(400).send(error.message)
-    })
-}
 
 exports.get_all_users= async (req,res)=>{
-    try{
+    
         const users = await User.find()
-        res.send(users)
-    } catch(error){
-        res.status(500).send(error.message)
-    }
-}
-
-exports.get_user_Byid = (req,res)=>{
-    User.findById(req.params.id,(err,data)=>{
-        if(!err){
-            res.send(data)
-        } else {
-            console.log(err)
-        }
+        .then(users=>{
+            return res.send(users)
+        })
+        
+    .catch(err=>{
+        res.status(500).send(err)
     })
 }
+
 
 exports.get_user_ByString =(req,res)=>{
     const regex = new RegExp(req.params.name,'i')
-    User.find({name:regex}).then((users)=>{
-        res.status(200).json(users)
+    User.find({name:regex})
+    .then((users)=>{
+       return res.status(200).json(users)
+    }).catch(err=>{
+        res.status(500).send(err)
     })
 }
 
@@ -90,13 +79,13 @@ exports.user_profile_picture=upload.single('profile'),async(req,res)=>{
 }
 
 exports.users_registered=(req,res)=>{
-    User.countDocuments().then((count,err)=>{
-        if(err){
-            res.status(401)
-        }
-        else{
-            res.json(count)
-        }
+    User.countDocuments()
+    .then((count)=>{
+    console.log(count)
+      return res.json(count)
+        
+    }).catch(err=>{
+        error:err
     })
 }
 

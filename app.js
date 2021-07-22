@@ -26,10 +26,12 @@ res.send({
 //Routes
 const userRoutes = require('./routes/user')
 const employeeRoutes =require('./routes/employee')
+const kycUserRoutes=require('./routes/kycUser')
 
 
 app.use('/',userRoutes)
 app.use('/',employeeRoutes)
+app.use('/',kycUserRoutes)
 
 
 connectDB()

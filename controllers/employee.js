@@ -1,6 +1,5 @@
 const express = require('express')
 const router = express.Router()
-const db = require('../config/db')
 const { employee } = require('../models/employee')
 const bcrypt =require('bcrypt')
 const jwt = require('jsonwebtoken')
@@ -79,13 +78,17 @@ exports.employee_login=(req,res,next)=>{
     })
 }
 
-exports.get_employees=async (req,res)=>{
-    try{
-        const users = await employee.find()
-        res.send(users)
-    } catch(error){
-        res.status(500).send(error.message)
-    }
+exports.get_employees= (req,res)=>{
+
+        const users =  employee.find()
+        .then(users=>{
+           return res.send(users)
+        })
+       .catch(err=>{
+        res.status(500).json({
+            error:err
+        })
+    })
 }
 exports.get_employee_Byid=(req,res)=>{
     employee.findById(req.params.id,(err,data)=>{
